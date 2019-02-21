@@ -1,3 +1,4 @@
 [
-["index.html", "R2-final Chapter 1 Preface", " R2-final Yufei Zhao 2019-02-21 Chapter 1 Preface Hello world! "]
+["index.html", "R2-final Chapter 1 Preface", " R2-final Yufei Zhao 2019-02-21 Chapter 1 Preface Hello world! "],
+["version-1.html", "Chapter 2 Version 1 2.1 Figure 1 2.2 Figure 2 2.3 Figure 3", " Chapter 2 Version 1 2.1 Figure 1 Figure 2.1: Color bias results by groups 2.2 Figure 2 ## [1] 0.7153918 ## ## Pearson&#39;s product-moment correlation ## ## data: color_cor_exc$`14` and color_cor$Col_bia_mean ## t = 5.3201, df = 27, p-value = 0.0000129 ## alternative hypothesis: true correlation is not equal to 0 ## 95 percent confidence interval: ## 0.4728705 0.8571555 ## sample estimates: ## cor ## 0.7153918 Figure 2.2: Correlation between the accuracy of the last run of the associative memory test and the color bias 2.3 Figure 3 Figure 2.3: Accuracy across 14 runs of the associative memory test of the successful group "]
 ]

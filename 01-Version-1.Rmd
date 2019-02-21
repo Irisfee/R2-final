@@ -1,0 +1,259 @@
+# Version 1 
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r settings}
+rm(list=ls())
+pacman::p_load(tidyverse, here, fs, glue, afex, emmeans, knitr, psych, scales, plotly)
+options("scipen" = 4)
+```
+
+```{r helperfunc}
+# merge different files
+multmerge = function(filenames){
+  datalist = lapply(filenames, function(x){read_delim(file=x, delim = "\t")})
+  Reduce(function(x,y) {merge(x,y, all.x = TRUE, all.y = TRUE)}, datalist)
+}
+```
+
+```{r dir-setting}
+# Directories
+proj_dir <- path(here())
+color_dir <- path(proj_dir, "data","data_beh_color_lure")
+asso_dir <- path(proj_dir, "data","data_beh_asso_lure")
+exclu_color_dir <- path(proj_dir, "data","exclude_color")
+exclu_asso_dir <- path(proj_dir, "data","exclude_asso")
+```
+
+
+```{r data}
+# get the single file name
+allfiles_color = dir(color_dir, pattern='.csv', recursive=TRUE)
+# add the data fold name
+allfiles_color = paste(color_dir, allfiles_color, sep = "/")
+# all color test data
+dat_col <- multmerge(allfiles_color)
+
+# get the single file name
+allfiles_asso = dir(asso_dir, pattern='.csv', recursive=TRUE)
+# add the data fold name
+allfiles_asso = paste(asso_dir, allfiles_asso, sep = "/")
+# all asso test data
+dat_asso <- multmerge(allfiles_asso)
+
+
+# get the single file name
+exc_asso = dir(exclu_asso_dir, pattern='.csv', recursive=TRUE)
+# add the data fold name
+exc_asso = paste(exclu_asso_dir, exc_asso, sep = "/")
+# all asso test data
+dat_exc_asso <- multmerge(exc_asso)
+
+# get the single file name
+exc_color = dir(exclu_color_dir, pattern='.csv', recursive=TRUE)
+# add the data fold name
+exc_color = paste(exclu_color_dir, exc_color, sep = "/")
+
+# all color test data
+dat_exc_col <- multmerge(exc_color)
+
+dat_asso$Group <- rep('Successful',nrow(dat_asso))
+dat_col$Group <- rep('Successful',nrow(dat_col))
+dat_exc_asso$Group <- rep('Struggling',nrow(dat_exc_asso))
+dat_exc_col$Group <- rep('Struggling',nrow(dat_exc_col))
+dat_exc_asso$SubjID <- dat_exc_asso$SubjID*10
+dat_exc_col$SubjID <- dat_exc_col$SubjID*10
+dat_asso <- rbind(dat_asso,dat_exc_asso)
+dat_col <- rbind(dat_col,dat_exc_col)
+```
+
+
+```{r absolute-error}
+# Color memory test data
+
+
+dat_col$Abs_Err <- abs(dat_col$RotateAng-dat_col$colchoice)
+i = 0
+# dealing with the 355 - 12 error
+for (i in seq_along(dat_col$Abs_Err)){
+  if (abs(360-dat_col$Abs_Err[i]) < dat_col$Abs_Err[i]){
+    dat_col$Abs_Err_corr[i] <- abs(360-dat_col$Abs_Err[i])
+  }
+  else{dat_col$Abs_Err_corr[i] <- dat_col$Abs_Err[i] }
+}
+```
+
+```{r Color-Bias}
+# negative value for driven away
+# positive value for driven closer
+# dealing with the overflow issue
+for (i in seq_along(dat_col$Abs_Err)){
+  if (dat_col$PairNo[i] %% 2 == 1){
+    if (abs(360-dat_col$Abs_Err[i]) < dat_col$Abs_Err[i]){
+      if (dat_col$colchoice[i] < dat_col$RotateAng[i]){
+        dat_col$Col_Bia[i] <- dat_col$Abs_Err_corr[i]
+      }
+      else{
+        dat_col$Col_Bia[i] <- -dat_col$Abs_Err_corr[i]
+      }
+    }
+    else{
+      if (dat_col$colchoice[i] < dat_col$RotateAng[i]){
+        dat_col$Col_Bia[i] <- -dat_col$Abs_Err_corr[i]
+      }
+      else{
+        dat_col$Col_Bia[i] <- dat_col$Abs_Err_corr[i]
+      }
+    }
+  }
+  else{
+    if (abs(360-dat_col$Abs_Err[i]) < dat_col$Abs_Err[i]){
+      if (dat_col$colchoice[i] < dat_col$RotateAng[i]){
+        dat_col$Col_Bia[i] <- -dat_col$Abs_Err_corr[i]
+      }
+      else{
+        dat_col$Col_Bia[i] <- dat_col$Abs_Err_corr[i]
+      }
+    }
+    else{
+      if (dat_col$colchoice[i] < dat_col$RotateAng[i]){
+        dat_col$Col_Bia[i] <- dat_col$Abs_Err_corr[i]
+      }
+      else{
+        dat_col$Col_Bia[i] <- -dat_col$Abs_Err_corr[i]
+      }
+    }
+  }
+}
+
+```
+
+```{r guesses-away-from-competitor}
+for (i in seq_along(dat_col$Abs_Err)){
+  if (dat_col$Col_Bia[i] < 0){dat_col$away[i] <- 1}
+  else{dat_col$away[i] <- 0}
+}
+```
+
+
+
+```{r asso-data}
+# Associative memory test data
+
+dat_asso <- na.omit(dat_asso)
+dat_asso$SubjID <- as.factor(dat_asso$SubjID)
+dat_asso$RunNo <- as.factor(dat_asso$RunNo)
+# specify hit/lure/foil
+for (i in seq_along(dat_asso$facechoice)){
+  if (dat_asso$facechoice[i] == 1){dat_asso$hit[i] = 1}
+  else{dat_asso$hit[i] = 0}
+  
+  if (dat_asso$facechoice[i] == 2){dat_asso$lure[i] = 1}
+  else{dat_asso$lure[i] = 0}
+  
+  if (dat_asso$facechoice[i] == 3 |dat_asso$facechoice[i] == 4){dat_asso$foil[i] = 1}
+  else{dat_asso$foil[i] = 0}
+}
+```
+
+```{r}
+dat_col_subj <- dat_col %>% 
+  mutate(SubjID = as.factor(SubjID)) %>% 
+  group_by(SubjID,Group) %>% 
+  summarise(Abs_Err_mean = mean(Abs_Err_corr),
+            Col_bia_mean = mean(Col_Bia),
+            away_mean = mean(away))
+```
+
+
+```{r }
+dat_asso_subj <- dat_asso %>% 
+  mutate(SubjID = as.factor(SubjID)) %>% 
+  group_by(Group,SubjID, RunNo) %>% 
+  summarise(hit_mean = mean(hit),
+            lure_mean = mean(lure),
+            foil_mean = mean(foil),
+            RT_mean =mean(RT)) %>% 
+  ungroup()
+
+dat_asso_hit <- dat_asso_subj %>% 
+  dplyr::select(Group,SubjID, RunNo, hit_mean) %>% 
+  spread(key = RunNo, hit_mean)
+
+
+
+
+color_cor <- dat_asso_hit %>% 
+  dplyr::select(-(3:12)) %>% 
+  mutate(last_four_round_mean = (`11`+`12`+`13`+`14`)/4) %>% 
+  mutate(SubjID = as.factor(SubjID)) %>% 
+  left_join(dat_col_subj) %>% 
+  mutate(Group = as.factor(Group))
+
+for (i in seq_along(color_cor$Col_bia_mean)){
+             color_cor$Col_bia_mean[i] = -color_cor$Col_bia_mean[i]
+             }
+
+m <- aov_ez(data = color_cor, id = "SubjID", dv = "Col_bia_mean", between = "Group")
+t <- afex_plot(m, x = "Group", error_ci = FALSE, return = "data", error = "between")
+f <- magrittr::extract2(t, 1)%>%
+  rename(Group = x, Col_bia_mean = y)
+```
+
+
+
+## Figure 1
+```{r fig.cap='Color bias results by groups',out.width='80%', fig.asp=.75, fig.align='center'}
+ggplot(color_cor,aes(x = Group, y = Col_bia_mean, fill = Group)) +
+  geom_bar(stat ="summary", fun.y = "mean", width = 0.3) +
+  geom_jitter(width = 0.05) + 
+  geom_hline(aes(yintercept=0), colour="#990000", linetype="dashed") +
+  ylab("Color Bias (degree)") +
+  xlab("Group")  + 
+  scale_x_discrete(limits=c("Successful","Struggling")) +
+  theme_minimal() + 
+  ylim(-20, 10)
+```
+
+
+## Figure 2
+```{r fig.cap='Correlation between the accuracy of the last run of the associative memory test and the color bias',out.width='80%', fig.asp=.75, fig.align='center'}
+color_cor_exc <- color_cor
+cor(color_cor_exc$`14`,color_cor$Col_bia_mean)
+cor.test(color_cor_exc$`14`,color_cor$Col_bia_mean)
+model <- lm(Col_bia_mean ~ `14`, color_cor_exc)
+xmin <- min(color_cor_exc$`14`)
+xmax <- max(color_cor_exc$`14`)
+predicted <- data.frame( `14` = seq(xmin,xmax,length.out = 100))
+colnames(predicted)[1] <- '14'
+predicted$Col_bia_mean <- predict(model,predicted)
+
+ggplot(color_cor_exc,aes(y=Col_bia_mean, x=`14`)) +
+  geom_point(aes(colour = Group))+
+  ylab("Color bias") +
+  xlab("Acc: last run of associative memory test")+
+  scale_x_continuous(labels=percent) + ylim(-20,10) +
+  geom_smooth(method = "lm", se = F) +
+  theme_minimal() 
+```
+
+
+## Figure 3
+```{r fig.cap='Accuracy across 14 runs of the associative memory test of the successful group', out.width='80%', fig.asp=.75, fig.align='center'}
+dat_dyn <- dat_asso_subj %>% 
+  filter(Group == "Successful") 
+d <- highlight_key(dat_dyn, ~SubjID)
+
+p <- ggplot(d, aes(RunNo, hit_mean, group = SubjID)) +
+  geom_line() +
+  ylim(0,1) +
+  ylab("Accuracy") +
+  xlab("#Run")+ 
+  theme(legend.position="none")+
+  scale_y_continuous(labels=percent)
+gg <- ggplotly(p, tooltip = "SubjID") 
+highlight(gg, on = "plotly_hover", dynamic = TRUE)
+```
+
