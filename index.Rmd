@@ -3,14 +3,14 @@ title: "R2-final"
 author: "Yufei Zhao"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
-output: bookdown::gitbook
+output: 
+  bookdown::gitbook
 documentclass: book
 bibliography: [packages.bib]
 biblio-style: apalike
 link-citations: yes
 github-repo: Irisfee/R2-final
 description: "final project for r class"
-output_dir: "docs"
 ---
 ```{r include=FALSE}
 # automatically create a bib database for R packages
