@@ -6,7 +6,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 ```{r settings}
 rm(list=ls())
-pacman::p_load(tidyverse, here, fs, glue, afex, emmeans, knitr, psych, scales, plotly)
+pacman::p_load(tidyverse, here, fs, glue, afex, emmeans, knitr, psych, scales, plotly, RColorBrewer)
 options("scipen" = 4)
 ```
 
@@ -196,10 +196,10 @@ for (i in seq_along(color_cor$Col_bia_mean)){
              color_cor$Col_bia_mean[i] = -color_cor$Col_bia_mean[i]
              }
 
-m <- aov_ez(data = color_cor, id = "SubjID", dv = "Col_bia_mean", between = "Group")
-t <- afex_plot(m, x = "Group", error_ci = FALSE, return = "data", error = "between")
-f <- magrittr::extract2(t, 1)%>%
-  rename(Group = x, Col_bia_mean = y)
+# m <- aov_ez(data = color_cor, id = "SubjID", dv = "Col_bia_mean", between = "Group")
+# t <- afex_plot(m, x = "Group", error_ci = FALSE, return = "data", error = "between")
+# f <- magrittr::extract2(t, 1)%>%
+#   rename(Group = x, Col_bia_mean = y)
 ```
 
 
@@ -214,7 +214,8 @@ ggplot(color_cor,aes(x = Group, y = Col_bia_mean, fill = Group)) +
   xlab("Group")  + 
   scale_x_discrete(limits=c("Successful","Struggling")) +
   theme_minimal() + 
-  ylim(-20, 10)
+  ylim(-20, 10) +
+  scale_fill_brewer(palette = "Set1")
 ```
 
 
@@ -233,10 +234,11 @@ predicted$Col_bia_mean <- predict(model,predicted)
 ggplot(color_cor_exc,aes(y=Col_bia_mean, x=`14`)) +
   geom_point(aes(colour = Group))+
   ylab("Color bias") +
-  xlab("Acc: last run of associative memory test")+
+  xlab("Accuracy of the last run of the associative memory test")+
   scale_x_continuous(labels=percent) + ylim(-20,10) +
-  geom_smooth(method = "lm", se = F) +
-  theme_minimal() 
+  geom_smooth(method = "lm", se = F, color = "grey30") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1")
 ```
 
 
@@ -252,7 +254,8 @@ p <- ggplot(d, aes(RunNo, hit_mean, group = SubjID)) +
   ylab("Accuracy") +
   xlab("#Run")+ 
   theme(legend.position="none")+
-  scale_y_continuous(labels=percent)
+  scale_y_continuous(labels=percent)+
+  theme_minimal() 
 gg <- ggplotly(p, tooltip = "SubjID") 
 highlight(gg, on = "plotly_hover", dynamic = TRUE)
 ```
