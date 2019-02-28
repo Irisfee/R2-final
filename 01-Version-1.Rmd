@@ -193,17 +193,18 @@ for (i in seq_along(color_cor$Col_bia_mean)) {
 
 
 ## Figure 1
-```{r fig.cap='Color bias results by groups',out.width='80%', fig.asp=.75, fig.align='center'}
-ggplot(color_cor,aes(x = Group, y = Col_bia_mean, fill = Group)) +
-  geom_bar(stat = "summary", fun.y = "mean", width = 0.3) +
-  geom_jitter(width = 0.05) + 
-  geom_hline(aes(yintercept = 0), colour = "#990000", linetype = "dashed") +
+```{r fig.cap='Color bias results by groups', out.width='80%', fig.asp=.75, fig.align='center'}
+ggplot(color_cor, aes(x = Group, y = Col_bia_mean, fill = Group)) +
+  geom_bar(stat = "summary", fun.y = "mean", width = 0.3) + # Cam: Great use of summarizing by mean inside a geom_bar!
+  geom_jitter(width = 0.05) +  # Cam: Very good use of jittering in a dimension that does not reflect a variable!
+  geom_hline(aes(yintercept = 0), colour = "#990000", linetype = "dashed") + # Cam: I really like this dashed line. It makes it clear that we are looking at the bars distances from 0. 
   ylab("Color Bias (degree)") +
-  xlab("Group")  + 
-  scale_x_discrete(limits = c("Successful","Struggling")) +
+  xlab(NULL) + # Cam: I'm not sure how much information the x label provided beyond the group names alones. 
+  scale_x_discrete(limits = c("Successful", "Struggling")) + # Cam: I didn't know you could set axis limits using discrete variables. Very cool!
   theme_minimal() + 
-  ylim(-20, 10) +
-  scale_fill_brewer(palette = "Set1")
+  ylim(-20, 20) + # Cam: Personally, I prefer to have the limits be equidistant around the x-axis (i.e., -20 and 20, instead of -20 and 10)
+  scale_fill_manual(values = c("#ff3030", "#62aff7")) # Cam: Although I really like your choice of colors, they looks nearly indistinguishable in black and white. A pallette similar to the manual color values here should do the trick. 
+
 ```
 
 
