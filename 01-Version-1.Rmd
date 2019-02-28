@@ -1,7 +1,7 @@
 # Version 1 
 
 ```{r setup, echo = FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE) # Cam: I like that you set this up ahead of time; very efficient!
 ```
 
 ```{r settings}
