@@ -24,8 +24,8 @@ options("scipen" = 4)
 
 ```{r helperfunc}
 # merge different files
-multmerge = function(filenames){
-  datalist = lapply(filenames, function(x){read_delim(file = x, delim = "\t")})
+multmerge <- function(filenames){
+  datalist <- lapply(filenames, function(x){read_delim(file = x, delim = "\t")})
   Reduce(function(x,y) {merge(x,y, all.x = TRUE, all.y = TRUE)}, datalist)
 }
 ```
@@ -37,6 +37,8 @@ color_dir <- path(proj_dir, "data","data_beh_color_lure")
 asso_dir <- path(proj_dir, "data","data_beh_asso_lure")
 exclu_color_dir <- path(proj_dir, "data","exclude_color")
 exclu_asso_dir <- path(proj_dir, "data","exclude_asso")
+
+# Cam: Ooh! I like that you figured out all of your paths ahead of time!
 ```
 
 
