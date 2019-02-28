@@ -61,7 +61,9 @@ dat_col <- rbind(dat_col,dat_exc_col)
 ```{r absolute-error}
 # Color memory test data
 dat_col$Abs_Err <- abs(dat_col$RotateAng - dat_col$colchoice)
-i = 0
+
+# i = 0 Cam: There is not need to explicitely create i
+
 # dealing with the 355 - 12 error
 for (i in seq_along(dat_col$Abs_Err)) {
   if (abs(360 - dat_col$Abs_Err[i]) < dat_col$Abs_Err[i]) {
@@ -127,10 +129,10 @@ for (i in seq_along(dat_col$Abs_Err)) {
 
 ```{r asso-data}
 # Associative memory test data
-
 dat_asso <- na.omit(dat_asso)
 dat_asso$SubjID <- as.factor(dat_asso$SubjID)
 dat_asso$RunNo <- as.factor(dat_asso$RunNo)
+
 # specify hit/lure/foil
 for (i in seq_along(dat_asso$facechoice)) {
   if (dat_asso$facechoice[i] == 1) {dat_asso$hit[i] = 1}
