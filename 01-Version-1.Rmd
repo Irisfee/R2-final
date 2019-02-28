@@ -5,8 +5,20 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE) # Cam: I l
 ```
 
 ```{r settings}
-rm(list = ls())
-pacman::p_load(tidyverse, here, fs, glue, afex, emmeans, knitr, psych, scales, plotly, RColorBrewer)
+#rm(list = ls()) Cam: I believe the best practice is to restart the r ression every time you run your code. This would seem to obviate the need for `rm(list = ls ())
+pacman::p_load(tidyverse, 
+               here, 
+               fs, 
+               glue, 
+               afex, 
+               emmeans, 
+               knitr, 
+               psych, 
+               scales, 
+               plotly, 
+               RColorBrewer, 
+               install = FALSE) # Cam: I had never seen `p_load` before, this is very nifty! My one concern is that it is generally frowned upon to load packages on someone else computers. I included the `install = FALSE` argument here. 
+
 options("scipen" = 4)
 ```
 
