@@ -31,7 +31,7 @@ multmerge <- function(filenames){
 ```
 
 ```{r data}
-# Cam: I really liked that you figured out all of your paths ahead of time! I also found your use of dir in the next block ingenious. I did note that `full.names` argument in the `list.files()` function may be able to cut out a couple of steps in this and the following block and remove the need to figure out the the paths ahead of time. 
+# Cam: I really liked that you figured out all of your paths ahead of time! I also found your use of dir ingenious. I did note that `full.names` argument in the `list.files()` function may be able to cut out a couple of steps in the process and remove the need to figure out the the paths ahead of time. 
 
 # multmerge the data
 dat_col <- multmerge(list.files(here("data/data_beh_color_lure"), 
@@ -46,13 +46,13 @@ dat_exc_asso <- multmerge(list.files(here("data/exclude_asso"),
 dat_exc_col <- multmerge(list.files(here("data/exclude_color"), 
                                      full.names = TRUE))
 
-
-dat_asso$Group <- rep('Successful',nrow(dat_asso))
-dat_col$Group <- rep('Successful',nrow(dat_col))
-dat_exc_asso$Group <- rep('Struggling',nrow(dat_exc_asso))
-dat_exc_col$Group <- rep('Struggling',nrow(dat_exc_col))
-dat_exc_asso$SubjID <- dat_exc_asso$SubjID*10
-dat_exc_col$SubjID <- dat_exc_col$SubjID*10
+# add grouping columns
+dat_asso$Group <- rep('Successful', nrow(dat_asso))
+dat_col$Group <- rep('Successful', nrow(dat_col))
+dat_exc_asso$Group <- rep('Struggling', nrow(dat_exc_asso))
+dat_exc_col$Group <- rep('Struggling', nrow(dat_exc_col))
+dat_exc_asso$SubjID <- dat_exc_asso$SubjID * 10 # Cam: I'm not sure why you are multiplying the subject ids by 10
+dat_exc_col$SubjID <- dat_exc_col$SubjID * 10
 dat_asso <- rbind(dat_asso,dat_exc_asso)
 dat_col <- rbind(dat_col,dat_exc_col)
 ```
@@ -60,8 +60,6 @@ dat_col <- rbind(dat_col,dat_exc_col)
 
 ```{r absolute-error}
 # Color memory test data
-
-
 dat_col$Abs_Err <- abs(dat_col$RotateAng - dat_col$colchoice)
 i = 0
 # dealing with the 355 - 12 error
