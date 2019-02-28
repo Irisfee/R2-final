@@ -30,48 +30,22 @@ multmerge <- function(filenames){
 }
 ```
 
-```{r dir-setting}
-# Directories
-proj_dir <- path(here())
-color_dir <- path(proj_dir, "data","data_beh_color_lure")
-asso_dir <- path(proj_dir, "data","data_beh_asso_lure")
-exclu_color_dir <- path(proj_dir, "data","exclude_color")
-exclu_asso_dir <- path(proj_dir, "data","exclude_asso")
-
-# Cam: Ooh! I like that you figured out all of your paths ahead of time!
-```
-
-
 ```{r data}
-# get the single file name
-allfiles_color = dir(color_dir, pattern = '.csv', recursive = TRUE)
-# add the data fold name
-allfiles_color = paste(color_dir, allfiles_color, sep = "/")
-# all color test data
-dat_col <- multmerge(allfiles_color)
+# Cam: I really liked that you figured out all of your paths ahead of time! I also found your use of dir in the next block ingenious. I did note that `full.names` argument in the `list.files()` function may be able to cut out a couple of steps in this and the following block and remove the need to figure out the the paths ahead of time. 
 
-# get the single file name
-allfiles_asso = dir(asso_dir, pattern = '.csv', recursive = TRUE)
-# add the data fold name
-allfiles_asso = paste(asso_dir, allfiles_asso, sep = "/")
-# all asso test data
-dat_asso <- multmerge(allfiles_asso)
+# multmerge the data
+dat_col <- multmerge(list.files(here("data/data_beh_color_lure"), 
+                                full.names = TRUE))
 
+dat_asso <- multmerge(list.files(here("data/data_beh_asso_lure"), 
+                                full.names = TRUE))
 
-# get the single file name
-exc_asso = dir(exclu_asso_dir, pattern = '.csv', recursive = TRUE)
-# add the data fold name
-exc_asso = paste(exclu_asso_dir, exc_asso, sep = "/")
-# all asso test data
-dat_exc_asso <- multmerge(exc_asso)
+dat_exc_asso <- multmerge(list.files(here("data/exclude_asso"), 
+                                     full.names = TRUE))
 
-# get the single file name
-exc_color = dir(exclu_color_dir, pattern = '.csv', recursive = TRUE)
-# add the data fold name
-exc_color = paste(exclu_color_dir, exc_color, sep = "/")
+dat_exc_col <- multmerge(list.files(here("data/exclude_color"), 
+                                     full.names = TRUE))
 
-# all color test data
-dat_exc_col <- multmerge(exc_color)
 
 dat_asso$Group <- rep('Successful',nrow(dat_asso))
 dat_col$Group <- rep('Successful',nrow(dat_col))
