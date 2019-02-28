@@ -216,17 +216,17 @@ cor.test(color_cor_exc$`14`,color_cor$Col_bia_mean)
 model <- lm(Col_bia_mean ~ `14`, color_cor_exc)
 xmin <- min(color_cor_exc$`14`)
 xmax <- max(color_cor_exc$`14`)
-predicted <- data.frame( `14` = seq(xmin,xmax,length.out = 100))
+predicted <- data.frame( `14` = seq(xmin,xmax,length.out = 100)) # Cam: Great use of sequence to give you values between the xmin and xmax.
 colnames(predicted)[1] <- '14'
-predicted$Col_bia_mean <- predict(model,predicted)
+predicted$Col_bia_mean <- predict(model,predicted) # Cam: I have never come across the predict function. Awesome!
 
-ggplot(color_cor_exc,aes(y = Col_bia_mean, x = `14`)) +
-  geom_point(aes(colour = Group)) +
+ggplot(color_cor_exc, aes(y = Col_bia_mean, x = `14`)) +
+  geom_point(aes(colour = `14`), size = 5) + # Cam: Since it looks like group is based off a mean split of some sort, I wonder whether redundant coding with `14` here may be more meaningful than splitting by group. A larger size for the points may also be helpful. The points are a bit small. 
   ylab("Color bias") +
-  xlab("Accuracy of the last run of the associative memory test") +
-  scale_x_continuous(labels = percent) + ylim(-20,10) +
-  geom_smooth(method = "lm", se = F, color = "grey30") +
-  theme_minimal() +
+  xlab("Accuracy of the last run of the associative memory test") + # Cam: I like how accesibly written this label is.
+  scale_x_continuous(labels = percent) + ylim(-20, 10) + # Cam: Good use of labels as percentage.
+  geom_smooth(method = "lm", se = F, color = "grey30") + # Cam: I really like this choice of grey!
+  theme_minimal()
   scale_color_brewer(palette = "Set1")
 ```
 
