@@ -4,6 +4,15 @@
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
+I think it would be helpful to have a chunk with all the libraries to load at the top. 
+Oh I see now, pacman is a library to help load in packages! Never heard of it, super interesting!
+```{r}
+install.packages("pacman")
+library(pacman)
+install.packages("afex")
+library(afex)
+```
+
 ```{r settings}
 rm(list=ls())
 pacman::p_load(tidyverse, here, fs, glue, afex, emmeans, knitr, psych, scales, plotly, RColorBrewer)
@@ -206,7 +215,7 @@ for (i in seq_along(color_cor$Col_bia_mean)){
 
 ## Figure 1
 ```{r fig.cap='Color bias results by groups',out.width='80%', fig.asp=.75, fig.align='center'}
-ggplot(color_cor,aes(x = Group, y = Col_bia_mean, fill = Group)) +
+plot1 <- ggplot(color_cor,aes(x = Group, y = Col_bia_mean, fill = Group)) +
   geom_bar(stat ="summary", fun.y = "mean", width = 0.3) +
   geom_jitter(width = 0.05) + 
   geom_hline(aes(yintercept=0), colour="#990000", linetype="dashed") +
@@ -216,8 +225,18 @@ ggplot(color_cor,aes(x = Group, y = Col_bia_mean, fill = Group)) +
   theme_minimal() + 
   ylim(-20, 10) +
   scale_fill_brewer(palette = "Set1")
-```
 
+plot1 + theme(axis.title.x = element_text(size=14),
+           axis.text.x= element_text(size=12),
+           axis.title.y = element_text(size=14),
+           axis.text.y= element_text(size=12))
+# this is just a suggestion, but I think it's easier to read the labels with a slightly larger font. 
+```
+For figure 1 I really like the use of the individual data points over the bars; it helps view the variation! You could also lower the alpha in the bars so that points on the blue bars stick out a little more!
+
+I think it would be helpful to make the font for all the labels a little bigger. 
+
+It seems that message is pretty clear that those in the struggling group have a greater negative color bias. 
 
 ## Figure 2
 ```{r fig.cap='Correlation between the accuracy of the last run of the associative memory test and the color bias',out.width='80%', fig.asp=.75, fig.align='center'}
@@ -240,7 +259,7 @@ ggplot(color_cor_exc,aes(y=Col_bia_mean, x=`14`)) +
   theme_minimal() +
   scale_color_brewer(palette = "Set1")
 ```
-
+As in the last figure, the message is pretty clear which I appreciate! I like theme minimal because it directs me right to the data. I think you could increase font size of the labels and take out the zeros after the decimal places on the x axis! Another fun thing you could do is highlight the outlines using gghlighlight.
 
 ## Figure 3
 ```{r fig.cap='Accuracy across 14 runs of the associative memory test of the successful group', out.width='80%', fig.asp=.75, fig.align='center'}
@@ -260,3 +279,4 @@ gg <- ggplotly(p, tooltip = "SubjID")
 highlight(gg, on = "plotly_hover", dynamic = TRUE)
 ```
 
+This one is so cool! I really like being able to interact with the plot and even change the brush color. I like that lines are gray and not black it helps the chosen line pop out. I also like that you choose not to have a legend because it's not really necessary. For the x axis label I think you could remove the # sign because the information is available in the caption. My only other comment is to remove the zeros after the decimal points on the y axis. 
