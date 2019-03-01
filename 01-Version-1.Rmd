@@ -62,7 +62,7 @@ dat_col <- rbind(dat_col,dat_exc_col)
 # Color memory test data
 dat_col$Abs_Err <- abs(dat_col$RotateAng - dat_col$colchoice)
 
-# i = 0 Cam: There is not need to explicitely create i
+i = 0
 
 # dealing with the 355 - 12 error
 for (i in seq_along(dat_col$Abs_Err)) {
@@ -221,7 +221,7 @@ colnames(predicted)[1] <- '14'
 predicted$Col_bia_mean <- predict(model,predicted) # Cam: I have never come across the predict function. Awesome!
 
 ggplot(color_cor_exc, aes(y = Col_bia_mean, x = `14`)) +
-  geom_point(aes(colour = `14`), size = 5, alpha = .7) + # Cam: Since it looks like group is based off a mean split of some sort, I wonder whether redundant coding with `14` here may be more meaningful than splitting by group. A larger size for the points may also be helpful. The points are a bit small. 
+  geom_point(aes(colour = `14`), size = 5, alpha = .7) + # Cam: Since it looks like group is based off a mean split of some sort, I wonder whether redundant coding with `14` here may be more meaningful than splitting by group. A larger size for the points may also be helpful. 
   ylab("Color bias") +
   xlab("Accuracy of the last run of the associative memory test") + # Cam: I like how accesibly written this label is.
   scale_x_continuous(labels = percent) + ylim(-20, 10) + # Cam: Good use of labels as percentage.
@@ -237,18 +237,18 @@ ggplot(color_cor_exc, aes(y = Col_bia_mean, x = `14`)) +
 dat_dyn <- dat_asso_subj %>% 
   filter(Group == "Successful")
 
-d <- highlight_key(dat_dyn, ~SubjID) # Cam: I didn't know you could use the tilde to separate the highlighting by subject. In any case, nice work!
+d <- highlight_key(dat_dyn, ~SubjID) # Cam: Very good use of the tilde to separate highlighting by subject id. 
 
 p <- ggplot(d, aes(RunNo, hit_mean, group = SubjID)) +
   geom_line(lwd = 1.5) + # Cam: I like the lines a bit bigger, but that is just personal preference. 
   ylab("Accuracy") +
   xlab("Run") + 
-  theme(legend.position = "none") +
+  theme(legend.position = "none") + # Cam: Nice work suppressing the legend. It was definitely not needed!
   scale_y_continuous(labels = scales::percent, limits = c(0, 1)) + # Cam: Moving the ylim inside scale_y_continuous should allow you to get the limits running from 0 to 100.  
   theme_minimal() 
 
 gg <- ggplotly(p, tooltip = "SubjID") 
 
-highlight(gg, on = "plotly_hover", dynamic = TRUE) # Cam: I never knew how to do this! Great work!
+highlight(gg, on = "plotly_hover", dynamic = TRUE) # Cam: I never knew how to do this! This is awesome!
 ```
 
