@@ -266,6 +266,7 @@ ggplot(color_cor_exc, aes(y = Col_bia_mean, x = `14`)) +
 * Changes: 
     * take out the zeros after the decimal places on the x axis
     * enlarge the text size
+    
 Here shows how subjects from the successful group improved on their associative memory test across 14 study-and-test runs. 
 
 ```{r fig.cap='Accuracy across 14 runs of the associative memory test of the successful group', out.width='80%', fig.asp=.75, fig.align='center'}
