@@ -1,58 +1,70 @@
 # Version 1 
 
 ```{r setup, echo = FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE) # Cam: I like that you set this up ahead of time; very efficient!
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
 ```{r settings}
-#rm(list = ls()) Cam: I believe the best practice is to restart the r ression every time you run your code. This would seem to obviate the need for `rm(list = ls ())
-pacman::p_load(tidyverse, 
-               here, 
-               fs, 
-               glue, 
-               afex, 
-               emmeans, 
-               knitr, 
-               psych, 
-               scales, 
-               plotly, 
-               RColorBrewer, 
-               install = FALSE) # Cam: I had never seen `p_load` before, this is very nifty! My one concern is that it is generally frowned upon to load packages on someone else computers. I included the `install = FALSE` argument here. 
-
+rm(list=ls())
+pacman::p_load(tidyverse, here, fs, glue, afex, emmeans, knitr, psych, scales, plotly, RColorBrewer)
 options("scipen" = 4)
 ```
 
 ```{r helperfunc}
 # merge different files
-multmerge <- function(filenames){
-  datalist <- lapply(filenames, function(x){read_delim(file = x, delim = "\t")})
+multmerge = function(filenames){
+  datalist = lapply(filenames, function(x){read_delim(file=x, delim = "\t")})
   Reduce(function(x,y) {merge(x,y, all.x = TRUE, all.y = TRUE)}, datalist)
 }
 ```
 
+```{r dir-setting}
+# Directories
+proj_dir <- path(here())
+color_dir <- path(proj_dir, "data","data_beh_color_lure")
+asso_dir <- path(proj_dir, "data","data_beh_asso_lure")
+exclu_color_dir <- path(proj_dir, "data","exclude_color")
+exclu_asso_dir <- path(proj_dir, "data","exclude_asso")
+```
+
+
 ```{r data}
-# Cam: I really liked that you figured out all of your paths ahead of time! I also found your use of `dir` ingenious. I did note that `full.names` argument in the `list.files()` function may be able to cut out a couple of steps in the process and remove the need to figure out the the paths ahead of time. 
+# get the single file name
+allfiles_color = dir(color_dir, pattern='.csv', recursive=TRUE)
+# add the data fold name
+allfiles_color = paste(color_dir, allfiles_color, sep = "/")
+# all color test data
+dat_col <- multmerge(allfiles_color)
 
-# multmerge the data
-dat_col <- multmerge(list.files(here("data/data_beh_color_lure"), 
-                                full.names = TRUE))
+# get the single file name
+allfiles_asso = dir(asso_dir, pattern='.csv', recursive=TRUE)
+# add the data fold name
+allfiles_asso = paste(asso_dir, allfiles_asso, sep = "/")
+# all asso test data
+dat_asso <- multmerge(allfiles_asso)
 
-dat_asso <- multmerge(list.files(here("data/data_beh_asso_lure"), 
-                                 full.names = TRUE))
 
-dat_exc_asso <- multmerge(list.files(here("data/exclude_asso"), 
-                                     full.names = TRUE))
+# get the single file name
+exc_asso = dir(exclu_asso_dir, pattern='.csv', recursive=TRUE)
+# add the data fold name
+exc_asso = paste(exclu_asso_dir, exc_asso, sep = "/")
+# all asso test data
+dat_exc_asso <- multmerge(exc_asso)
 
-dat_exc_col <- multmerge(list.files(here("data/exclude_color"), 
-                                    full.names = TRUE))
+# get the single file name
+exc_color = dir(exclu_color_dir, pattern='.csv', recursive=TRUE)
+# add the data fold name
+exc_color = paste(exclu_color_dir, exc_color, sep = "/")
 
-# add grouping columns
-dat_asso$Group <- rep('Successful', nrow(dat_asso))
-dat_col$Group <- rep('Successful', nrow(dat_col))
-dat_exc_asso$Group <- rep('Struggling', nrow(dat_exc_asso))
-dat_exc_col$Group <- rep('Struggling', nrow(dat_exc_col))
-dat_exc_asso$SubjID <- dat_exc_asso$SubjID * 10
-dat_exc_col$SubjID <- dat_exc_col$SubjID * 10
+# all color test data
+dat_exc_col <- multmerge(exc_color)
+
+dat_asso$Group <- rep('Successful',nrow(dat_asso))
+dat_col$Group <- rep('Successful',nrow(dat_col))
+dat_exc_asso$Group <- rep('Struggling',nrow(dat_exc_asso))
+dat_exc_col$Group <- rep('Struggling',nrow(dat_exc_col))
+dat_exc_asso$SubjID <- dat_exc_asso$SubjID*10
+dat_exc_col$SubjID <- dat_exc_col$SubjID*10
 dat_asso <- rbind(dat_asso,dat_exc_asso)
 dat_col <- rbind(dat_col,dat_exc_col)
 ```
@@ -60,14 +72,14 @@ dat_col <- rbind(dat_col,dat_exc_col)
 
 ```{r absolute-error}
 # Color memory test data
-dat_col$Abs_Err <- abs(dat_col$RotateAng - dat_col$colchoice)
 
+
+dat_col$Abs_Err <- abs(dat_col$RotateAng-dat_col$colchoice)
 i = 0
-
 # dealing with the 355 - 12 error
-for (i in seq_along(dat_col$Abs_Err)) {
-  if (abs(360 - dat_col$Abs_Err[i]) < dat_col$Abs_Err[i]) {
-    dat_col$Abs_Err_corr[i] <- abs(360 - dat_col$Abs_Err[i])
+for (i in seq_along(dat_col$Abs_Err)){
+  if (abs(360-dat_col$Abs_Err[i]) < dat_col$Abs_Err[i]){
+    dat_col$Abs_Err_corr[i] <- abs(360-dat_col$Abs_Err[i])
   }
   else{dat_col$Abs_Err_corr[i] <- dat_col$Abs_Err[i] }
 }
@@ -77,10 +89,10 @@ for (i in seq_along(dat_col$Abs_Err)) {
 # negative value for driven away
 # positive value for driven closer
 # dealing with the overflow issue
-for (i in seq_along(dat_col$Abs_Err)) {
-  if (dat_col$PairNo[i] %% 2 == 1) {
-    if (abs(360 - dat_col$Abs_Err[i]) < dat_col$Abs_Err[i]) {
-      if (dat_col$colchoice[i] < dat_col$RotateAng[i]) {
+for (i in seq_along(dat_col$Abs_Err)){
+  if (dat_col$PairNo[i] %% 2 == 1){
+    if (abs(360-dat_col$Abs_Err[i]) < dat_col$Abs_Err[i]){
+      if (dat_col$colchoice[i] < dat_col$RotateAng[i]){
         dat_col$Col_Bia[i] <- dat_col$Abs_Err_corr[i]
       }
       else{
@@ -88,7 +100,7 @@ for (i in seq_along(dat_col$Abs_Err)) {
       }
     }
     else{
-      if (dat_col$colchoice[i] < dat_col$RotateAng[i]) {
+      if (dat_col$colchoice[i] < dat_col$RotateAng[i]){
         dat_col$Col_Bia[i] <- -dat_col$Abs_Err_corr[i]
       }
       else{
@@ -97,8 +109,8 @@ for (i in seq_along(dat_col$Abs_Err)) {
     }
   }
   else{
-    if (abs(360 - dat_col$Abs_Err[i]) < dat_col$Abs_Err[i]) {
-      if (dat_col$colchoice[i] < dat_col$RotateAng[i]) {
+    if (abs(360-dat_col$Abs_Err[i]) < dat_col$Abs_Err[i]){
+      if (dat_col$colchoice[i] < dat_col$RotateAng[i]){
         dat_col$Col_Bia[i] <- -dat_col$Abs_Err_corr[i]
       }
       else{
@@ -106,7 +118,7 @@ for (i in seq_along(dat_col$Abs_Err)) {
       }
     }
     else{
-      if (dat_col$colchoice[i] < dat_col$RotateAng[i]) {
+      if (dat_col$colchoice[i] < dat_col$RotateAng[i]){
         dat_col$Col_Bia[i] <- dat_col$Abs_Err_corr[i]
       }
       else{
@@ -119,8 +131,8 @@ for (i in seq_along(dat_col$Abs_Err)) {
 ```
 
 ```{r guesses-away-from-competitor}
-for (i in seq_along(dat_col$Abs_Err)) {
-  if (dat_col$Col_Bia[i] < 0) {dat_col$away[i] <- 1}
+for (i in seq_along(dat_col$Abs_Err)){
+  if (dat_col$Col_Bia[i] < 0){dat_col$away[i] <- 1}
   else{dat_col$away[i] <- 0}
 }
 ```
@@ -129,19 +141,19 @@ for (i in seq_along(dat_col$Abs_Err)) {
 
 ```{r asso-data}
 # Associative memory test data
+
 dat_asso <- na.omit(dat_asso)
 dat_asso$SubjID <- as.factor(dat_asso$SubjID)
 dat_asso$RunNo <- as.factor(dat_asso$RunNo)
-
 # specify hit/lure/foil
-for (i in seq_along(dat_asso$facechoice)) {
-  if (dat_asso$facechoice[i] == 1) {dat_asso$hit[i] = 1}
+for (i in seq_along(dat_asso$facechoice)){
+  if (dat_asso$facechoice[i] == 1){dat_asso$hit[i] = 1}
   else{dat_asso$hit[i] = 0}
   
-  if (dat_asso$facechoice[i] == 2) {dat_asso$lure[i] = 1}
+  if (dat_asso$facechoice[i] == 2){dat_asso$lure[i] = 1}
   else{dat_asso$lure[i] = 0}
   
-  if (dat_asso$facechoice[i] == 3 | dat_asso$facechoice[i] == 4) {dat_asso$foil[i] = 1}
+  if (dat_asso$facechoice[i] == 3 |dat_asso$facechoice[i] == 4){dat_asso$foil[i] = 1}
   else{dat_asso$foil[i] = 0}
 }
 ```
@@ -163,7 +175,7 @@ dat_asso_subj <- dat_asso %>%
   summarise(hit_mean = mean(hit),
             lure_mean = mean(lure),
             foil_mean = mean(foil),
-            RT_mean = mean(RT)) %>% 
+            RT_mean =mean(RT)) %>% 
   ungroup()
 
 dat_asso_hit <- dat_asso_subj %>% 
@@ -175,12 +187,12 @@ dat_asso_hit <- dat_asso_subj %>%
 
 color_cor <- dat_asso_hit %>% 
   dplyr::select(-(3:12)) %>% 
-  mutate(last_four_round_mean = (`11` + `12` + `13` + `14`) / 4) %>% 
+  mutate(last_four_round_mean = (`11`+`12`+`13`+`14`)/4) %>% 
   mutate(SubjID = as.factor(SubjID)) %>% 
   left_join(dat_col_subj) %>% 
   mutate(Group = as.factor(Group))
 
-for (i in seq_along(color_cor$Col_bia_mean)) {
+for (i in seq_along(color_cor$Col_bia_mean)){
              color_cor$Col_bia_mean[i] = -color_cor$Col_bia_mean[i]
              }
 
@@ -193,18 +205,17 @@ for (i in seq_along(color_cor$Col_bia_mean)) {
 
 
 ## Figure 1
-```{r fig.cap='Color bias results by groups', out.width='80%', fig.asp=.75, fig.align='center'}
-ggplot(color_cor, aes(x = Group, y = Col_bia_mean, fill = Group)) +
-  geom_bar(stat = "summary", fun.y = "mean", width = 0.3) + # Cam: Great use of summarizing by mean inside a geom_bar!
-  geom_jitter(width = 0.05) +  # Cam: Very good use of jittering in a dimension that does not reflect a variable!
-  geom_hline(aes(yintercept = 0), colour = "#990000", linetype = "dashed") + # Cam: I really like this dashed line. It makes it clear that we are looking at the bars distances from 0. 
+```{r fig.cap='Color bias results by groups',out.width='80%', fig.asp=.75, fig.align='center'}
+ggplot(color_cor,aes(x = Group, y = Col_bia_mean, fill = Group)) +
+  geom_bar(stat ="summary", fun.y = "mean", width = 0.3) +
+  geom_jitter(width = 0.05) + 
+  geom_hline(aes(yintercept=0), colour="#990000", linetype="dashed") +
   ylab("Color Bias (degree)") +
-  xlab(NULL) + # Cam: I'm not sure how much information the x label provided beyond the group names alones. 
-  scale_x_discrete(limits = c("Successful", "Struggling")) + # Cam: I didn't know you could set axis limits using discrete variables. Very cool!
+  xlab("Group")  + 
+  scale_x_discrete(limits=c("Successful","Struggling")) +
   theme_minimal() + 
-  ylim(-20, 20) + # Cam: Personally, I prefer to have the limits be equidistant around the x-axis (i.e., -20 and 20, instead of -20 and 10)
-  scale_fill_manual(values = c("#ff3030", "#62aff7")) # Cam: Although I really like your choice of colors, they looks nearly indistinguishable in black and white. A pallette similar to the manual color values here should do the trick. 
-
+  ylim(-20, 10) +
+  scale_fill_brewer(palette = "Set1")
 ```
 
 
@@ -216,39 +227,36 @@ cor.test(color_cor_exc$`14`,color_cor$Col_bia_mean)
 model <- lm(Col_bia_mean ~ `14`, color_cor_exc)
 xmin <- min(color_cor_exc$`14`)
 xmax <- max(color_cor_exc$`14`)
-predicted <- data.frame( `14` = seq(xmin,xmax,length.out = 100)) # Cam: Great use of sequence to give you values between the xmin and xmax.
+predicted <- data.frame( `14` = seq(xmin,xmax,length.out = 100))
 colnames(predicted)[1] <- '14'
-predicted$Col_bia_mean <- predict(model,predicted) # Cam: I have never come across the predict function. Awesome!
+predicted$Col_bia_mean <- predict(model,predicted)
 
-ggplot(color_cor_exc, aes(y = Col_bia_mean, x = `14`)) +
-  geom_point(aes(colour = `14`), size = 5, alpha = .7) + # Cam: Since it looks like group is based off a mean split of some sort, I wonder whether redundant coding with `14` here may be more meaningful than splitting by group. A larger size for the points may also be helpful. 
+ggplot(color_cor_exc,aes(y=Col_bia_mean, x=`14`)) +
+  geom_point(aes(colour = Group))+
   ylab("Color bias") +
-  xlab("Accuracy of the last run of the associative memory test") + # Cam: I like how accesibly written this label is.
-  scale_x_continuous(labels = percent) + ylim(-20, 10) + # Cam: Good use of labels as percentage.
-  geom_smooth(method = "lm", se = F, color = "grey30") + # Cam: I really like this choice of grey!
+  xlab("Accuracy of the last run of the associative memory test")+
+  scale_x_continuous(labels=percent) + ylim(-20,10) +
+  geom_smooth(method = "lm", se = F, color = "grey30") +
   theme_minimal() +
-  scale_color_gradient( low = "red", high = "blue")
+  scale_color_brewer(palette = "Set1")
 ```
 
 
 ## Figure 3
 ```{r fig.cap='Accuracy across 14 runs of the associative memory test of the successful group', out.width='80%', fig.asp=.75, fig.align='center'}
-# Cam: Nice work setting the figure captions in the block heads!
 dat_dyn <- dat_asso_subj %>% 
-  filter(Group == "Successful")
-
-d <- highlight_key(dat_dyn, ~SubjID) # Cam: Very good use of the tilde to separate highlighting by subject id. 
+  filter(Group == "Successful") 
+d <- highlight_key(dat_dyn, ~SubjID)
 
 p <- ggplot(d, aes(RunNo, hit_mean, group = SubjID)) +
-  geom_line(lwd = 1.5) + # Cam: I like the lines a bit bigger, but that is just personal preference. 
+  geom_line() +
+  ylim(0,1) +
   ylab("Accuracy") +
-  xlab("Run") + 
-  theme(legend.position = "none") + # Cam: Nice work suppressing the legend. It was definitely not needed!
-  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) + # Cam: Moving the ylim inside scale_y_continuous should allow you to get the limits running from 0 to 100.  
+  xlab("#Run")+ 
+  theme(legend.position="none")+
+  scale_y_continuous(labels=percent)+
   theme_minimal() 
-
 gg <- ggplotly(p, tooltip = "SubjID") 
-
-highlight(gg, on = "plotly_hover", dynamic = TRUE) # Cam: I never knew how to do this! This is awesome!
+highlight(gg, on = "plotly_hover", dynamic = TRUE)
 ```
 
