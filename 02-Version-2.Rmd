@@ -60,6 +60,7 @@ dat_col <- rbind(dat_col,dat_exc_col)
 
 ```{r absolute-error2}
 # Color memory test data
+# here is to do some math about the color degrees along a color wheel
 dat_col$Abs_Err <- abs(dat_col$RotateAng - dat_col$colchoice)
 
 i = 0
@@ -74,6 +75,7 @@ for (i in seq_along(dat_col$Abs_Err)) {
 ```
 
 ```{r Color-Bias2}
+# here is to do even more math on the exaggeration effect happened to the color degrees
 # negative value for driven away
 # positive value for driven closer
 # dealing with the overflow issue
@@ -193,21 +195,43 @@ for (i in seq_along(color_cor$Col_bia_mean)) {
 
 
 ## Figure 1
+
+* Audience: academic
+* Changes: 
+    * add alpha to the bars to make the black dots clear
+    * enlarge the text size
+
+For the color bias results, most of the participants from the successful group obtained a relatively large positive number on this, which indicates exaggeration happened among the successful group. In contrast, struggling group received more negative numbers and small positive numbers, which is the opposite to the exaggeration.
+
 ```{r fig.cap='Color bias results by groups', out.width='80%', fig.asp=.75, fig.align='center'}
 ggplot(color_cor, aes(x = Group, y = Col_bia_mean, fill = Group)) +
-  geom_bar(stat = "summary", fun.y = "mean", width = 0.3, alpha = .6) + # Cam: Great use of summarizing by mean inside a geom_bar!
-  geom_jitter(width = 0.05) +  # Cam: Very good use of jittering in a dimension that does not reflect a variable!
-  geom_hline(aes(yintercept = 0), colour = "#990000", linetype = "dashed") + # Cam: I really like this dashed line. It makes it clear that we are looking at the bars distances from 0. 
+  geom_bar(stat = "summary", fun.y = "mean", width = 0.3, alpha = .6) + 
+  geom_jitter(width = 0.05) + 
+  geom_hline(aes(yintercept = 0), colour = "#990000", linetype = "dashed") + 
   ylab("Color Bias (degree)") +
-  xlab(NULL) + # Cam: I'm not sure how much information the x label provided beyond the group names alones. 
-  scale_x_discrete(limits = c("Successful", "Struggling")) + # Cam: I didn't know you could set axis limits using discrete variables. Very cool!
+  xlab(NULL) + 
+  scale_x_discrete(limits = c("Successful", "Struggling")) + 
   theme_minimal() + 
   ylim(-20, 10) +
-  scale_fill_brewer(palette = "Set1") 
+  scale_fill_brewer(palette = "Set1") + 
+  theme(axis.title.x = element_text(size=14),
+	           axis.text.x= element_text(size=12),
+	           axis.title.y = element_text(size=14),
+	           axis.text.y= element_text(size=12))
 ```
 
 
+
 ## Figure 2
+
+* Audience: academic
+* Changes: 
+    * take out the zeros after the decimal places on the x axis
+    * add alpha to the bars to make the black dots clear
+    * enlarge the text size
+
+Participants who had higher accuracy of associative memory tended to have a higher color bias, which indicates a greater exaggeration effect. 
+
 ```{r fig.cap='Correlation between the accuracy of the last run of the associative memory test and the color bias',out.width='80%', fig.asp=.75, fig.align='center'}
 color_cor_exc <- color_cor
 # cor(color_cor_exc$`14`,color_cor$Col_bia_mean)
@@ -221,35 +245,45 @@ predicted$Col_bia_mean <- predict(model, predicted) # Cam: I have never come acr
 
 
 ggplot(color_cor_exc, aes(y = Col_bia_mean, x = `14`)) +
-  geom_point(aes(colour = Group))+
+  geom_point(aes(colour = Group), alpha = .7)+
   ylab("Color bias") +
   xlab("Accuracy of the last run of the associative memory test") +
   scale_x_continuous(labels = scales::percent_format(accuracy = 1)) + 
   ylim(-20,10) +
   geom_smooth(method = "lm", se = F, color = "grey30") +
   theme_minimal() +
-  scale_color_brewer(palette = "Set1")
+  scale_color_brewer(palette = "Set1") + 
+  theme(axis.title.x = element_text(size=14),
+	           axis.text.x= element_text(size=12),
+	           axis.title.y = element_text(size=14),
+	           axis.text.y= element_text(size=12))
 ```
 
 
 ## Figure 3
+
+* Audience: public
+* Changes: 
+    * take out the zeros after the decimal places on the x axis
+    * enlarge the text size
+Here shows how subjects from the successful group improved on their associative memory test across 14 study-and-test runs. 
+
 ```{r fig.cap='Accuracy across 14 runs of the associative memory test of the successful group', out.width='80%', fig.asp=.75, fig.align='center'}
-# Cam: Nice work setting the figure captions in the block heads!
 dat_dyn <- dat_asso_subj %>% 
   filter(Group == "Successful")
 
-d <- highlight_key(dat_dyn, ~SubjID) # Cam: Very good use of the tilde to separate highlighting by subject id. 
+d <- highlight_key(dat_dyn, ~SubjID) 
 
 p <- ggplot(d, aes(RunNo, hit_mean, group = SubjID)) +
-  geom_line() + # Cam: I like the lines a bit bigger, but that is just personal preference. 
+  geom_line() + 
   ylab("Accuracy") +
   xlab("Run") + 
-  theme(legend.position = "none") + # Cam: Nice work suppressing the legend. It was definitely not needed!
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, 1)) + # Cam: Moving the ylim inside scale_y_continuous should allow you to get the limits running from 0 to 100.  
+  theme(legend.position = "none") + 
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) + 
   theme_minimal() 
 
 gg <- ggplotly(p, tooltip = "SubjID") 
 
-highlight(gg, on = "plotly_hover", dynamic = TRUE) # Cam: I never knew how to do this! This is awesome!
+highlight(gg, on = "plotly_hover", dynamic = TRUE) 
 ```
 
