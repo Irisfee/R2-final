@@ -200,6 +200,7 @@ for (i in seq_along(color_cor$Col_bia_mean)) {
 * Changes: 
     * add alpha to the bars to make the black dots clear
     * enlarge the text size
+    * remove the legend
 
 For the color bias results, most of the participants from the successful group obtained a relatively large positive number on this, which indicates exaggeration happened among the successful group. In contrast, struggling group received more negative numbers and small positive numbers, which is the opposite to the exaggeration.
 
@@ -217,7 +218,8 @@ ggplot(color_cor, aes(x = Group, y = Col_bia_mean, fill = Group)) +
   theme(axis.title.x = element_text(size=14),
 	           axis.text.x= element_text(size=12),
 	           axis.title.y = element_text(size=14),
-	           axis.text.y= element_text(size=12))
+	           axis.text.y= element_text(size=12),
+        legend.position="none")
 ```
 
 
@@ -267,7 +269,7 @@ ggplot(color_cor_exc, aes(y = Col_bia_mean, x = `14`)) +
     * take out the zeros after the decimal places on the x axis
     * enlarge the text size
     
-Here shows how subjects from the successful group improved on their associative memory test across 14 study-and-test runs. 
+Here shows how subjects from the successful group improved on their associative memory test across 14 study-and-test runs. Some subjects had amazingly good starts, while others learned the test gradually.
 
 ```{r fig.cap='Accuracy across 14 runs of the associative memory test of the successful group', out.width='80%', fig.asp=.75, fig.align='center'}
 dat_dyn <- dat_asso_subj %>% 
